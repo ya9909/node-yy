@@ -1,469 +1,628 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant - Your Gateway to Information</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>NEXUS | Digital Frontier</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --chat-bg: #ffffff;
-            --user-msg-bg: #007bff;
-            --bot-msg-bg: #e9ecef;
-            --text-color: #333;
-            --border-color: #ddd;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-dark: #050505;
+            --bg-panel: #0f1014;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #bc13fe;
+            --text-main: #e0e0e0;
+            --text-dim: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-cyan) var(--bg-dark);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-color);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        .chat-container {
-            width: 90%;
-            max-width: 800px;
-            height: 85vh;
-            background: var(--chat-bg);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+        /* 背景粒子画布 */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* 布局容器 */
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 16, 20, 0.95);
+            border-right: 1px solid rgba(0, 243, 255, 0.2);
+            padding: 2rem;
+            position: fixed;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            justify-content: space-between;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+        }
+
+        .brand span {
+            color: var(--neon-cyan);
+        }
+
+        .nav-links {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-links li {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+            padding: 10px;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.05);
+            border-left: 3px solid var(--neon-cyan);
+            padding-left: 20px;
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.6);
+        }
+
+        .nav-links i {
+            width: 30px;
+        }
+
+        .status-panel {
+            border: 1px solid var(--text-dim);
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: var(--neon-pink);
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 4rem 6rem;
             position: relative;
         }
 
-        .chat-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 20px;
-            text-align: center;
+        section {
+            min-height: 80vh;
+            margin-bottom: 4rem;
+            padding-top: 2rem;
+        }
+
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .section-header {
+            border-bottom: 1px solid var(--text-dim);
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: var(--white);
+        }
+
+        .section-tag {
+            background: var(--neon-pink);
+            color: #000;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 首页 Hero */
+        .hero-title {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .glitch-text {
+            position: relative;
+        }
+
+        .typewriter {
             font-size: 1.5rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: var(--neon-cyan);
+            margin-bottom: 2rem;
+            min-height: 1.6em;
         }
 
-        .chat-header i {
-            margin-right: 10px;
-            font-size: 1.8rem;
-        }
-
-        .chat-window {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message-content-wrapper {
-            max-width: 75%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .message-content {
-            padding: 12px 18px;
-            border-radius: 18px;
-            line-height: 1.5;
-        }
-
-        .message.user .message-content {
-            background-color: var(--user-msg-bg);
-            color: white;
-        }
-
-        .message.bot .message-content {
-            background-color: var(--bot-msg-bg);
-            color: var(--text-color);
-        }
-        
-        .message-time {
-            font-size: 0.75rem;
-            color: #aaa;
-            margin-top: 5px;
-        }
-        .message.user .message-time {
-            text-align: right;
-        }
-        .message.bot .message-time {
-            text-align: left;
-        }
-        
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .bot .avatar {
-            background: var(--primary-gradient);
-        }
-
-        .user .avatar {
-            background-color: #6c757d;
-        }
-
-        .chat-input-container {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-            background: #fafbfc;
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 25px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .chat-input:focus {
-            border-color: #007bff;
-        }
-
-        .send-button {
-            padding: 12px 20px;
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .send-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .quick-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 10px 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        .quick-action-btn {
-            padding: 8px 16px;
-            background-color: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            color: var(--text-color);
+        .cyber-btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .quick-action-btn:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .quick-action-btn i {
-            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transition: 0.3s;
+            overflow: hidden;
+            background: transparent;
+            cursor: pointer;
         }
 
-        .foot_marker {
-            position: fixed;
-            bottom: 10px;
+        .cyber-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        /* 卡片网格 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .cyber-card {
+            background: rgba(20, 20, 25, 0.6);
+            border: 1px solid #333;
+            padding: 2rem;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
             left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 11px;
-            color: rgba(0,0,0,0.4);
-            z-index: 999;
-        }
-        
-        .foot_marker a {
-            color: rgba(0,0,0,0.4);
-            text-decoration: none;
-        }
-        
-        .foot_marker a:hover {
-            text-decoration: underline;
+            width: 0%;
+            height: 2px;
+            background: var(--neon-pink);
+            transition: 0.3s;
         }
 
-        /* Typing Indicator Styles */
-        .typing-dots {
-            padding: 15px 20px;
-            background-color: var(--bot-msg-bg);
-            border-radius: 18px;
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-pink);
+            box-shadow: 0 5px 15px rgba(188, 19, 254, 0.1);
+        }
+
+        .cyber-card:hover::before {
+            width: 100%;
+        }
+
+        .cyber-card i {
+            font-size: 2.5rem;
+            color: var(--neon-cyan);
+            margin-bottom: 1.5rem;
+        }
+
+        .cyber-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 技能条 */
+        .skill-box {
+            margin-bottom: 2rem;
+        }
+
+        .skill-header {
             display: flex;
-            align-items: center;
-            gap: 4px;
-            width: fit-content;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
         }
 
-        .typing-dots span {
-            width: 8px;
-            height: 8px;
-            background-color: #999;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #222;
+            border: 1px solid #333;
         }
 
-        .typing-dots span:nth-child(2) {
-            animation-delay: 0.2s;
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            width: 0;
+            transition: width 1.5s ease-out;
+            position: relative;
         }
 
-        .typing-dots span:nth-child(3) {
-            animation-delay: 0.4s;
+        /* 联系表单 */
+        .terminal-form {
+            background: #000;
+            border: 1px solid #333;
+            padding: 2rem;
+            font-family: 'Share Tech Mono', monospace;
         }
 
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-                opacity: 0.5;
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--neon-cyan);
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            background: #111;
+            border: none;
+            border-bottom: 2px solid #333;
+            color: #fff;
+            padding: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-bottom-color: var(--neon-pink);
+        }
+
+        /* 移动端适配 */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 200;
+            background: var(--bg-panel);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                width: 250px;
             }
-            30% {
-                transform: translateY(-10px);
-                opacity: 1;
-            }
-        }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .chat-container {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
+            .sidebar.active {
+                transform: translateX(0);
             }
-            .message-content-wrapper {
-                max-width: 85%;
+
+            .main-content {
+                margin-left: 0;
+                padding: 2rem;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="chat-container">
-        <header class="chat-header">
-            <i class="fas fa-robot"></i>
-            AI Assistant
-        </header>
+    <canvas id="canvas-bg"></canvas>
 
-        <main class="chat-window" id="chatWindow">
-            <div class="message bot">
-                <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="message-content-wrapper">
-                    <div class="message-content">
-                        Hello! I'm your AI assistant. How can I help you today? You can ask me anything or try one of the quick actions below.
+    <button class="mobile-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="wrapper">
+        <nav class="sidebar">
+            <div>
+                <div class="brand">
+                    <i class="fas fa-cube"></i> NEXUS<span>_OS</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home" class="active"><i class="fas fa-terminal"></i> /// HOME</a></li>
+                    <li><a href="#services"><i class="fas fa-microchip"></i> /// SERVICES</a></li>
+                    <li><a href="#projects"><i class="fas fa-project-diagram"></i> /// PROJECTS</a></li>
+                    <li><a href="#contact"><i class="fas fa-envelope-open-text"></i> /// SIGNAL</a></li>
+                </ul>
+            </div>
+            
+            <div class="status-panel">
+                <div class="status-item"><span>SYS.STATUS:</span> <span>ONLINE</span></div>
+                <div class="status-item"><span>UPTIME:</span> <span id="uptime">00:00:00</span></div>
+                <div class="status-item"><span>LOC:</span> <span>EARTH-616</span></div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            
+            <section id="home">
+                <div style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                    <p style="color: var(--neon-cyan); margin-bottom: 1rem;">> INITIALIZING USER INTERFACE...</p>
+                    <h1 class="hero-title">WE BUILD THE<br><span style="color: var(--neon-pink); text-shadow: 2px 2px 0px rgba(255,255,255,0.2);">FUTURE REALITY</span></h1>
+                    <div class="typewriter" id="typewriter"></div>
+                    <div>
+                        <a href="#projects" class="cyber-btn">EXECUTE_PROJECTS.EXE</a>
                     </div>
-                    <div class="message-time">09:41</div>
                 </div>
-            </div>
-            <!-- Typing Indicator (initially hidden) -->
-            <div id="typingIndicator" class="message bot" style="display: none;">
-                <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="message-content typing-dots">
-                    <span></span><span></span><span></span>
+            </section>
+
+            <section id="services">
+                <div class="section-header">
+                    <h2>Core Modules</h2>
+                    <span class="section-tag">v2.4.0</span>
                 </div>
-            </div>
+                <div class="grid-container">
+                    <div class="cyber-card">
+                        <i class="fas fa-code"></i>
+                        <h3>Web Development</h3>
+                        <p>Full-stack architecture deploying scalable solutions using next-gen frameworks. React, Vue, Node.js integration.</p>
+                    </div>
+                    <div class="cyber-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Cyber Security</h3>
+                        <p>Advanced penetration testing and secure infrastructure setup. Protecting digital assets from unauthorized access.</p>
+                    </div>
+                    <div class="cyber-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>Mobile Matrix</h3>
+                        <p>Cross-platform application development. Fluid interfaces for iOS and Android ecosystems.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects">
+                <div class="section-header">
+                    <h2>Data Archives</h2>
+                    <span class="section-tag">READ_ONLY</span>
+                </div>
+                
+                <div class="skill-box">
+                    <div class="skill-header">
+                        <span>SYSTEM OPTIMIZATION</span>
+                        <span>98%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 98%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-box">
+                    <div class="skill-header">
+                        <span>NEURAL NETWORK TRAINING</span>
+                        <span>75%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+
+                <div class="skill-box">
+                    <div class="skill-header">
+                        <span>QUANTUM ENCRYPTION</span>
+                        <span>42%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 42%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact">
+                <div class="section-header">
+                    <h2>Transmit Signal</h2>
+                    <span class="section-tag">ENCRYPTED</span>
+                </div>
+                <div class="terminal-form">
+                    <p style="color: #666; margin-bottom: 2rem;">// Please enter your message coordinates below.</p>
+                    <form>
+                        <div class="input-group">
+                            <label>USER_ID (Name)</label>
+                            <input type="text" placeholder="_">
+                        </div>
+                        <div class="input-group">
+                            <label>COMM_LINK (Email)</label>
+                            <input type="email" placeholder="_">
+                        </div>
+                        <div class="input-group">
+                            <label>PAYLOAD (Message)</label>
+                            <textarea rows="5" placeholder="_"></textarea>
+                        </div>
+                        <button type="button" class="cyber-btn" onclick="alert('SIGNAL TRANSMITTED SUCCESSFULLY')">SEND_DATA</button>
+                    </form>
+                </div>
+            </section>
+
+            <footer style="margin-top: 4rem; border-top: 1px solid #333; padding-top: 2rem; color: #666; font-size: 0.9rem;">
+                <p>&copy; 2025 NEXUS CORP. ALL RIGHTS RESERVED. <span style="float: right;">SYSTEM_VER: 4.8.15</span></p>
+            </footer>
         </main>
-
-        <div class="quick-actions">
-            <!-- These are your actual navigation links -->
-            <a href="https://www.google.com" target="_blank" class="quick-action-btn" data-site-name="Google Search">
-                <i class="fas fa-search"></i> Search Web
-            </a>
-            <a href="https://www.youtube.com" target="_blank" class="quick-action-btn" data-site-name="YouTube">
-                <i class="fab fa-youtube"></i> Watch Videos
-            </a>
-            <a href="https://github.com" target="_blank" class="quick-action-btn" data-site-name="GitHub">
-                <i class="fab fa-github"></i> View Code
-            </a>
-            <a href="https://stackoverflow.com" target="_blank" class="quick-action-btn" data-site-name="Stack Overflow">
-                <i class="fab fa-stack-overflow"></i> Get Help
-            </a>
-            <a href="https://www.reddit.com" target="_blank" class="quick-action-btn" data-site-name="Reddit">
-                <i class="fab fa-reddit"></i> Browse Reddit
-            </a>
-            <a href="https://news.ycombinator.com" target="_blank" class="quick-action-btn" data-site-name="Hacker News">
-                <i class="fab fa-hacker-news"></i> Tech News
-            </a>
-            <a href="https://openai.com" target="_blank" class="quick-action-btn" data-site-name="OpenAI">
-                <i class="fas fa-brain"></i> Learn AI
-            </a>
-            <a href="https://www.figma.com" target="_blank" class="quick-action-btn" data-site-name="Figma">
-                <i class="fab fa-figma"></i> Design
-            </a>
-        </div>
-
-        <div class="chat-input-container">
-            <!-- Form submission is now handled by JavaScript -->
-            <form id="chatForm" style="display: flex; width: 100%;">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything or search the web..." required>
-                <button type="submit" class="send-button">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
-        </div>
     </div>
 
-    <footer class="foot_marker">
-        <a href="https://github.com/eooce" target="_blank">Powered by eooce</a>
-    </footer>
-
     <script>
-        const chatWindow = document.getElementById('chatWindow');
-        const chatForm = document.getElementById('chatForm');
-        const chatInput = document.getElementById('chatInput');
-        const typingIndicator = document.getElementById('typingIndicator');
+        // 1. 打字机特效
+        const textToType = ["Design. Develop. Deploy.", "Creative Technology Solutions.", "Welcome to the Nexus."];
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typeSpeed = 100;
+        const deleteSpeed = 50;
+        const waitTime = 2000;
+        const typewriterElement = document.getElementById('typewriter');
 
-        function getCurrentTime() {
-            const now = new Date();
-            return now.getHours().toString().padStart(2, '0') + ':' + 
-                   now.getMinutes().toString().padStart(2, '0');
+        function type() {
+            const currentText = textToType[textIndex];
+            
+            if (isDeleting) {
+                typewriterElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typewriterElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeDelay = isDeleting ? deleteSpeed : typeSpeed;
+
+            if (!isDeleting && charIndex === currentText.length) {
+                typeDelay = waitTime;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % textToType.length;
+            }
+
+            setTimeout(type, typeDelay);
+        }
+        
+        document.addEventListener('DOMContentLoaded', type);
+
+        // 2. 粒子背景特效
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.1; // 小点
+                this.speedX = (Math.random() * 1.5 - 0.75) * 0.5;
+                this.speedY = (Math.random() * 1.5 - 0.75) * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(0, 243, 255, 0.5)'; // 青色粒子
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
-        function addUserMessage(text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'user');
-            messageDiv.innerHTML = `
-                <div class="avatar"><i class="fas fa-user"></i></div>
-                <div class="message-content-wrapper">
-                    <div class="message-content">${text}</div>
-                    <div class="message-time">${getCurrentTime()}</div>
-                </div>
-            `;
-            chatWindow.appendChild(messageDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
         }
 
-        function addBotMessage(text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'bot');
-            messageDiv.innerHTML = `
-                <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="message-content-wrapper">
-                    <div class="message-content">${text}</div>
-                    <div class="message-time">${getCurrentTime()}</div>
-                </div>
-            `;
-            chatWindow.appendChild(messageDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
-        function generateBotResponse(query) {
-            const responses = [
-                `I'm looking up "${query}" for you.`,
-                `That's an interesting question about "${query}". Let me find the best resources.`,
-                `Searching for information on "${query}". I'll open the results for you.`,
-                `Good question! Here's what I found about "${query}".`
-            ];
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        function simulateBotResponse(query, link) {
-            // Show typing indicator
-            typingIndicator.style.display = 'flex';
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-
-            // Simulate thinking time
-            setTimeout(() => {
-                // Hide typing indicator
-                typingIndicator.style.display = 'none';
-                
-                // Add bot message
-                const responseText = link ? `Sure! Opening ${query} for you.` : generateBotResponse(query);
-                addBotMessage(responseText);
-
-                // If there's a link, open it after a short delay
-                if (link) {
-                    setTimeout(() => {
-                        window.open(link, '_blank');
-                    }, 500);
-                } else {
-                    // If it's a search query, open Google search
-                    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-                    setTimeout(() => {
-                        window.open(searchUrl, '_blank');
-                    }, 500);
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                // 连线逻辑
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${1 - distance/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
                 }
-            }, 1500 + Math.random() * 1500); // Random delay between 1.5s and 3s
+            }
+            requestAnimationFrame(animateParticles);
         }
 
-        // Handle form submission (user input)
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
+        initParticles();
+        animateParticles();
 
-            const inputText = chatInput.value.trim();
-            if (!inputText) return;
-
-            // 1. Display user's message
-            addUserMessage(inputText);
-            chatInput.value = ''; // Clear input box
-
-            // 2. Trigger bot response simulation
-            simulateBotResponse(inputText);
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
         });
 
-        // Handle quick action button clicks
-        document.querySelectorAll('.quick-action-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault(); // Prevent immediate navigation
-                const link = this.href;
-                const siteName = this.dataset.siteName || this.innerText.trim();
+        // 3. 运行时间计时器
+        let seconds = 0;
+        function updateUptime() {
+            seconds++;
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(updateUptime, 1000);
 
-                // 1. Display user's click as a message
-                addUserMessage(`Take me to ${siteName}`);
+        // 4. 移动端菜单切换
+        const mobileBtn = document.querySelector('.mobile-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        mobileBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
 
-                // 2. Trigger bot response simulation
-                simulateBotResponse(siteName, link);
+        // 点击导航链接自动关闭侧边栏（移动端）
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                
+                // 简单的平滑滚动
+                document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
             });
         });
-
-        // Example: Add a follow-up message after a delay on load
-        setTimeout(() => {
-            addBotMessage("You can also type your query in the input box to search the web directly.");
-        }, 2000);
     </script>
 </body>
 </html>
