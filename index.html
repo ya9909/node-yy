@@ -3,304 +3,467 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Navigation</title>
+    <title>AI Assistant - Your Gateway to Information</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --chat-bg: #ffffff;
+            --user-msg-bg: #007bff;
+            --bot-msg-bg: #e9ecef;
+            --text-color: #333;
+            --border-color: #ddd;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-image: url('https://source.unsplash.com/random/1920x1080?landscape');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            padding: 20px;
-            color: #333;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 85vh;
+            background: var(--chat-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            position: relative;
         }
-        
-        .header {
-            color: #fff;
-            font-size: 28px;
+
+        .chat-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .search-container {
-            padding: 2rem;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto 30px;
+
+        .chat-header i {
+            margin-right: 10px;
+            font-size: 1.8rem;
         }
-        
-        .search-box {
-            width: 100%;
-            padding: 18px 22px;
-            font-size: 18px;
-            border: none;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            outline: none;
-            background-color: rgba(255, 255, 255, 0.85);
-            transition: all 0.3s ease;
-        }
-        
-        .search-box:focus {
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
+
+        .chat-window {
             flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-content-wrapper {
+            max-width: 75%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-content {
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background-color: var(--user-msg-bg);
+            color: white;
+        }
+
+        .message.bot .message-content {
+            background-color: var(--bot-msg-bg);
+            color: var(--text-color);
         }
         
-        .link-item {
-            background-color: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(10px);
+        .message-time {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .message.user .message-time {
+            text-align: right;
+        }
+        .message.bot .message-time {
+            text-align: left;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .bot .avatar {
+            background: var(--primary-gradient);
+        }
+
+        .user .avatar {
+            background-color: #6c757d;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            background: #fafbfc;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #007bff;
+        }
+
+        .send-button {
+            padding: 12px 20px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .quick-action-btn {
+            padding: 8px 16px;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 20px 15px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            height: 90px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .link-item:hover {
-            background-color: rgba(255, 255, 255, 0.9);
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .link-item a {
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            color: var(--text-color);
             text-decoration: none;
-            color: #333;
-            display: flex;
-            flex-direction: column;
+            display: inline-flex;
             align-items: center;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
+            gap: 8px;
         }
         
-        .link-icon {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #555;
+        .quick-action-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
-        .link-text {
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-            word-break: break-word;
+        .quick-action-btn i {
+            font-size: 1rem;
         }
-        
+
         .foot_marker {
-            margin-top: 40px;
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
             text-align: center;
-            font-size: 12px;
-            color: rgba(255,255,255,0.8);
-            padding: 10px 0;
+            font-size: 11px;
+            color: rgba(0,0,0,0.4);
+            z-index: 999;
         }
-
+        
         .foot_marker a {
-            color: rgba(255,255,255,0.9);
+            color: rgba(0,0,0,0.4);
             text-decoration: none;
-            transition: color 0.3s ease;
-            padding: 5px 10px;
-            border-radius: 15px;
+        }
+        
+        .foot_marker a:hover {
+            text-decoration: underline;
         }
 
-        .foot_marker a:hover {
-            color: #fff;
-            background-color: rgba(0,0,0,0.2);
+        /* Typing Indicator Styles */
+        .typing-dots {
+            padding: 15px 20px;
+            background-color: var(--bot-msg-bg);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 12px;
+        @media (max-width: 600px) {
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
             }
-            .link-item {
-                height: 80px;
-                padding: 15px 10px;
-            }
-            .link-icon {
-                font-size: 24px;
-            }
-            .link-text {
-                font-size: 13px;
+            .message-content-wrapper {
+                max-width: 85%;
             }
         }
     </style>
 </head>
 <body>
-    <header class="header">My Navigation</header>
-    
-    <main>
-        <div class="search-container">
-            <form action="https://www.google.com/search" method="get" target="_blank">
-                <input class="search-box" type="text" name="q" placeholder="Search...">
+
+    <div class="chat-container">
+        <header class="chat-header">
+            <i class="fas fa-robot"></i>
+            AI Assistant
+        </header>
+
+        <main class="chat-window" id="chatWindow">
+            <div class="message bot">
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content-wrapper">
+                    <div class="message-content">
+                        Hello! I'm your AI assistant. How can I help you today? You can ask me anything or try one of the quick actions below.
+                    </div>
+                    <div class="message-time">09:41</div>
+                </div>
+            </div>
+            <!-- Typing Indicator (initially hidden) -->
+            <div id="typingIndicator" class="message bot" style="display: none;">
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </main>
+
+        <div class="quick-actions">
+            <!-- These are your actual navigation links -->
+            <a href="https://www.google.com" target="_blank" class="quick-action-btn" data-site-name="Google Search">
+                <i class="fas fa-search"></i> Search Web
+            </a>
+            <a href="https://www.youtube.com" target="_blank" class="quick-action-btn" data-site-name="YouTube">
+                <i class="fab fa-youtube"></i> Watch Videos
+            </a>
+            <a href="https://github.com" target="_blank" class="quick-action-btn" data-site-name="GitHub">
+                <i class="fab fa-github"></i> View Code
+            </a>
+            <a href="https://stackoverflow.com" target="_blank" class="quick-action-btn" data-site-name="Stack Overflow">
+                <i class="fab fa-stack-overflow"></i> Get Help
+            </a>
+            <a href="https://www.reddit.com" target="_blank" class="quick-action-btn" data-site-name="Reddit">
+                <i class="fab fa-reddit"></i> Browse Reddit
+            </a>
+            <a href="https://news.ycombinator.com" target="_blank" class="quick-action-btn" data-site-name="Hacker News">
+                <i class="fab fa-hacker-news"></i> Tech News
+            </a>
+            <a href="https://openai.com" target="_blank" class="quick-action-btn" data-site-name="OpenAI">
+                <i class="fas fa-brain"></i> Learn AI
+            </a>
+            <a href="https://www.figma.com" target="_blank" class="quick-action-btn" data-site-name="Figma">
+                <i class="fab fa-figma"></i> Design
+            </a>
+        </div>
+
+        <div class="chat-input-container">
+            <!-- Form submission is now handled by JavaScript -->
+            <form id="chatForm" style="display: flex; width: 100%;">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything or search the web..." required>
+                <button type="submit" class="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </form>
         </div>
-        
-        <div class="container">
-            <!-- First Row -->
-            <div class="link-item">
-                <a href="https://www.google.com" target="_blank">
-                    <i class="fab fa-google link-icon"></i>
-                    <span class="link-text">Google</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.youtube.com" target="_blank">
-                    <i class="fab fa-youtube link-icon"></i>
-                    <span class="link-text">YouTube</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.gmail.com" target="_blank">
-                    <i class="fab fa-google link-icon"></i>
-                    <span class="link-text">Gmail</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://github.com" target="_blank">
-                    <i class="fab fa-github link-icon"></i>
-                    <span class="link-text">GitHub</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://stackoverflow.com" target="_blank">
-                    <i class="fab fa-stack-overflow link-icon"></i>
-                    <span class="link-text">Stack Overflow</span>
-                </a>
-            </div>
-            
-            <!-- Second Row -->
-            <div class="link-item">
-                <a href="https://www.reddit.com" target="_blank">
-                    <i class="fab fa-reddit link-icon"></i>
-                    <span class="link-text">Reddit</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://twitter.com" target="_blank">
-                    <i class="fab fa-x-twitter link-icon"></i>
-                    <span class="link-text">X (Twitter)</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.instagram.com" target="_blank">
-                    <i class="fab fa-instagram link-icon"></i>
-                    <span class="link-text">Instagram</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.linkedin.com" target="_blank">
-                    <i class="fab fa-linkedin link-icon"></i>
-                    <span class="link-text">LinkedIn</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://openai.com" target="_blank">
-                    <i class="fas fa-robot link-icon"></i>
-                    <span class="link-text">OpenAI</span>
-                </a>
-            </div>
-            
-            <!-- Third Row -->
-            <div class="link-item">
-                <a href="https://drive.google.com" target="_blank">
-                    <i class="fab fa-google-drive link-icon"></i>
-                    <span class="link-text">Google Drive</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.amazon.com" target="_blank">
-                    <i class="fab fa-amazon link-icon"></i>
-                    <span class="link-text">Amazon</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.netflix.com" target="_blank">
-                    <i class="fas fa-play link-icon"></i>
-                    <span class="link-text">Netflix</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.spotify.com" target="_blank">
-                    <i class="fab fa-spotify link-icon"></i>
-                    <span class="link-text">Spotify</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.wikipedia.org" target="_blank">
-                    <i class="fab fa-wikipedia-w link-icon"></i>
-                    <span class="link-text">Wikipedia</span>
-                </a>
-            </div>
-            
-            <!-- Fourth Row -->
-            <div class="link-item">
-                <a href="https://news.ycombinator.com" target="_blank">
-                    <i class="fab fa-hacker-news link-icon"></i>
-                    <span class="link-text">Hacker News</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.producthunt.com" target="_blank">
-                    <i class="fas fa-rocket link-icon"></i>
-                    <span class="link-text">Product Hunt</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.npmjs.com" target="_blank">
-                    <i class="fab fa-npm link-icon"></i>
-                    <span class="link-text">NPM</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://www.figma.com" target="_blank">
-                    <i class="fab fa-figma link-icon"></i>
-                    <span class="link-text">Figma</span>
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://cloudflare.com" target="_blank">
-                    <i class="fas fa-cloud link-icon"></i>
-                    <span class="link-text">Cloudflare</span>
-                </a>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <footer class="foot_marker">
         <a href="https://github.com/eooce" target="_blank">Powered by eooce</a>
     </footer>
 
     <script>
-        // Add keyboard shortcut for search (Ctrl/Cmd + K)
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                document.querySelector('.search-box').focus();
-            }
+        const chatWindow = document.getElementById('chatWindow');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + 
+                   now.getMinutes().toString().padStart(2, '0');
+        }
+
+        function addUserMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'user');
+            messageDiv.innerHTML = `
+                <div class="avatar"><i class="fas fa-user"></i></div>
+                <div class="message-content-wrapper">
+                    <div class="message-content">${text}</div>
+                    <div class="message-time">${getCurrentTime()}</div>
+                </div>
+            `;
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function addBotMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'bot');
+            messageDiv.innerHTML = `
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content-wrapper">
+                    <div class="message-content">${text}</div>
+                    <div class="message-time">${getCurrentTime()}</div>
+                </div>
+            `;
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function generateBotResponse(query) {
+            const responses = [
+                `I'm looking up "${query}" for you.`,
+                `That's an interesting question about "${query}". Let me find the best resources.`,
+                `Searching for information on "${query}". I'll open the results for you.`,
+                `Good question! Here's what I found about "${query}".`
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function simulateBotResponse(query, link) {
+            // Show typing indicator
+            typingIndicator.style.display = 'flex';
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // Simulate thinking time
+            setTimeout(() => {
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+                
+                // Add bot message
+                const responseText = link ? `Sure! Opening ${query} for you.` : generateBotResponse(query);
+                addBotMessage(responseText);
+
+                // If there's a link, open it after a short delay
+                if (link) {
+                    setTimeout(() => {
+                        window.open(link, '_blank');
+                    }, 500);
+                } else {
+                    // If it's a search query, open Google search
+                    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                    setTimeout(() => {
+                        window.open(searchUrl, '_blank');
+                    }, 500);
+                }
+            }, 1500 + Math.random() * 1500); // Random delay between 1.5s and 3s
+        }
+
+        // Handle form submission (user input)
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const inputText = chatInput.value.trim();
+            if (!inputText) return;
+
+            // 1. Display user's message
+            addUserMessage(inputText);
+            chatInput.value = ''; // Clear input box
+
+            // 2. Trigger bot response simulation
+            simulateBotResponse(inputText);
         });
+
+        // Handle quick action button clicks
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent immediate navigation
+                const link = this.href;
+                const siteName = this.dataset.siteName || this.innerText.trim();
+
+                // 1. Display user's click as a message
+                addUserMessage(`Take me to ${siteName}`);
+
+                // 2. Trigger bot response simulation
+                simulateBotResponse(siteName, link);
+            });
+        });
+
+        // Example: Add a follow-up message after a delay on load
+        setTimeout(() => {
+            addBotMessage("You can also type your query in the input box to search the web directly.");
+        }, 2000);
     </script>
 </body>
 </html>
